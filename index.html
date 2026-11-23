@@ -3,192 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#f7f7f8">
 <title>JONY MAIL</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
-  --bg:#0d0d0d;
-  --panel:#141414;
-  --panel-2:#1a1a1a;
-  --line:#262626;
-  --ink:#f0f0f0;
-  --ink-dim:#8a8a8a;
-  --ink-faint:#4a4a4a;
-  --accent:#d4ff00;
-  --danger:#ff4545;
-  --mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
-  --sans:"Inter","Helvetica Neue",Arial,sans-serif;
+  --bg:#f5f5f7;
+  --surface:#ffffff;
+  --surface-2:#fafafa;
+  --border:#e5e5e7;
+  --border-hover:#d0d0d3;
+  --ink:#1d1d1f;
+  --ink-2:#494949;
+  --ink-dim:#86868b;
+  --ink-faint:#c7c7cc;
+  --accent:#2563eb;
+  --accent-hover:#1d4ed8;
+  --accent-soft:#eff6ff;
+  --danger:#ef4444;
+  --success:#10b981;
+  --radius:14px;
+  --radius-sm:10px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.04);
+  --shadow:0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.12);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"SF Mono","Menlo","Consolas",monospace;
+}
+[data-theme="dark"]{
+  --bg:#0a0a0b;
+  --surface:#141416;
+  --surface-2:#1a1a1d;
+  --border:#26262a;
+  --border-hover:#3a3a40;
+  --ink:#f5f5f7;
+  --ink-2:#c7c7cc;
+  --ink-dim:#86868b;
+  --ink-faint:#48484d;
+  --accent:#3b82f6;
+  --accent-hover:#60a5fa;
+  --accent-soft:#1e3a5f;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.3);
+  --shadow:0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.6);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
   background:var(--bg);
   color:var(--ink);
-  font-family:var(--sans);
+  font-family:var(--font);
   font-size:14px;
   -webkit-font-smoothing:antialiased;
+  transition:background .3s, color .3s;
 }
 
 .app{
   display:grid;
-  grid-template-columns:280px 1fr;
+  grid-template-columns:300px 1fr;
   height:100vh;
   overflow:hidden;
 }
 
 /* ============ SIDEBAR ============ */
 .side{
-  background:var(--panel);
-  border-right:1px solid var(--line);
+  background:var(--surface);
+  border-right:1px solid var(--border);
   display:flex;flex-direction:column;
   height:100vh;
   overflow:hidden;
+  transition:background .3s, border-color .3s;
 }
 
 .side-head{
-  padding:20px 18px 16px;
-  border-bottom:1px solid var(--line);
+  padding:20px 20px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;
 }
 .brand{
-  font-family:var(--mono);
-  font-size:16px;
+  font-size:20px;
   font-weight:800;
-  letter-spacing:1px;
+  letter-spacing:-0.5px;
   color:var(--ink);
   display:flex;align-items:center;gap:8px;
 }
-.brand::before{
-  content:"";
-  width:8px;height:8px;
+.brand-dot{
+  width:10px;height:10px;
   background:var(--accent);
-  display:inline-block;
+  border-radius:50%;
+  box-shadow:0 0 12px var(--accent);
 }
+.icon-btn{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  color:var(--ink-2);
+  width:34px;height:34px;
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  transition:all .15s;
+}
+.icon-btn:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 
 .side-scroll{
   flex:1;
   overflow-y:auto;
-  padding:12px 10px;
+  padding:16px 12px;
 }
 
-.group-label{
-  font-family:var(--mono);
-  font-size:10px;
-  color:var(--ink-faint);
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  padding:12px 10px 6px;
-}
-
-.folder{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 12px;
-  cursor:pointer;
-  border-radius:6px;
-  color:var(--ink-dim);
-  font-size:13px;
-  transition:all .12s;
-  position:relative;
-}
-.folder:hover{background:var(--panel-2);color:var(--ink)}
-.folder.active{background:var(--panel-2);color:var(--ink)}
-.folder.active::before{
-  content:"";
-  position:absolute;left:0;top:8px;bottom:8px;
-  width:2px;background:var(--accent);
-}
-.folder-icon{
-  font-size:14px;
-  flex-shrink:0;
-  width:16px;text-align:center;
-}
-.folder-name{
-  flex:1;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.folder-count{
-  font-family:var(--mono);
-  font-size:10px;
-  color:var(--ink-faint);
-  background:var(--bg);
-  padding:2px 6px;
-  border-radius:3px;
-  min-width:20px;text-align:center;
-}
-.folder.active .folder-count{color:var(--accent)}
-
-/* account items */
-.account-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 12px;
-  border-radius:6px;
-  cursor:pointer;
-  color:var(--ink-dim);
-  font-size:12px;
-  transition:all .12s;
-  position:relative;
-}
-.account-item:hover{background:var(--panel-2);color:var(--ink)}
-.account-item.active{background:var(--panel-2);color:var(--ink)}
-.account-item.active::before{
-  content:"";
-  position:absolute;left:0;top:8px;bottom:8px;
-  width:2px;background:var(--accent);
-}
-.acc-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--accent);
-  flex-shrink:0;
-}
-.acc-email{
-  flex:1;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  font-family:var(--mono);
+.side-section{margin-bottom:24px}
+.side-label{
   font-size:11px;
+  font-weight:600;
+  color:var(--ink-dim);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  padding:0 12px 8px;
 }
+
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:11px 14px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  color:var(--ink-2);
+  font-size:13.5px;
+  font-weight:500;
+  transition:all .15s;
+  position:relative;
+  margin-bottom:2px;
+}
+.nav-item:hover{background:var(--surface-2);color:var(--ink)}
+.nav-item.active{
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-weight:600;
+}
+[data-theme="dark"] .nav-item.active{background:var(--accent-soft);color:#93c5fd}
+.nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
+.nav-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-count{
+  font-size:11px;
+  background:var(--surface-2);
+  color:var(--ink-dim);
+  padding:2px 8px;
+  border-radius:10px;
+  font-weight:600;
+  min-width:24px;text-align:center;
+}
+.nav-item.active .nav-count{
+  background:var(--accent);
+  color:white;
+}
+
+/* account row */
+.acc-row{
+  display:flex;align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:all .15s;
+  margin-bottom:2px;
+}
+.acc-row:hover{background:var(--surface-2)}
+.acc-row.active{background:var(--accent-soft)}
+[data-theme="dark"] .acc-row.active{background:var(--accent-soft)}
+.acc-avatar{
+  width:28px;height:28px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+  color:white;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:600;
+  font-size:13px;
+  flex-shrink:0;
+}
+.acc-info{flex:1;overflow:hidden}
+.acc-email{
+  font-size:13px;
+  color:var(--ink);
+  font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.acc-row.active .acc-email{color:var(--accent)}
 .acc-remove{
-  opacity:0;
-  background:none;border:0;color:var(--danger);
-  cursor:pointer;font-size:14px;
+  background:none;border:0;
+  color:var(--ink-faint);
+  cursor:pointer;
+  font-size:18px;
   padding:0 4px;
-  transition:opacity .12s;
   line-height:1;
+  opacity:0;
+  transition:opacity .15s;
 }
-.account-item:hover .acc-remove{opacity:1}
+.acc-row:hover .acc-remove{opacity:1}
+.acc-remove:hover{color:var(--danger)}
 
 .side-foot{
-  padding:12px;
-  border-top:1px solid var(--line);
+  padding:14px;
+  border-top:1px solid var(--border);
 }
 
 /* buttons */
 button{
-  font-family:var(--mono);
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  padding:10px 14px;
-  border-radius:6px;
-  border:1px solid var(--line);
-  background:transparent;
-  color:var(--ink-dim);
+  font-family:var(--font);
+  font-size:13px;
+  font-weight:600;
+  padding:10px 16px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--ink);
   cursor:pointer;
   transition:all .15s;
-  font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
 }
-button:hover{border-color:var(--accent);color:var(--accent)}
+button:hover{border-color:var(--border-hover);background:var(--surface-2)}
 button.primary{
   background:var(--accent);
   border-color:var(--accent);
-  color:#0a0a0a;
+  color:white;
   width:100%;
+  box-shadow:0 2px 8px rgba(37,99,235,0.25);
 }
-button.primary:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-button.sm{padding:6px 10px;font-size:10px}
+button.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);box-shadow:0 4px 12px rgba(37,99,235,0.35)}
 
 /* ============ MAIN ============ */
 .main{
@@ -199,109 +242,145 @@ button.sm{padding:6px 10px;font-size:10px}
 
 .topbar{
   padding:16px 24px;
-  border-bottom:1px solid var(--line);
-  display:flex;align-items:center;gap:14px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  display:flex;align-items:center;gap:12px;
   flex-wrap:wrap;
-  background:var(--panel);
+  transition:background .3s, border-color .3s;
 }
-.topbar h1{
-  font-size:18px;
+.page-title{
+  font-size:20px;
   font-weight:700;
-  letter-spacing:-0.3px;
+  letter-spacing:-0.5px;
+  color:var(--ink);
   flex:1;
   min-width:100px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.topbar h1 small{
-  font-family:var(--mono);
-  font-size:11px;
-  color:var(--ink-faint);
-  text-transform:uppercase;
-  letter-spacing:1.5px;
+.page-title small{
+  font-size:12px;
+  color:var(--ink-dim);
+  font-weight:500;
   margin-left:8px;
-  font-weight:400;
 }
 
-.search{
-  background:var(--panel-2);
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:9px 14px;
+.search-box{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:9px 14px 9px 36px;
   color:var(--ink);
-  font-family:var(--mono);
-  font-size:12px;
+  font-family:var(--font);
+  font-size:13px;
   outline:none;
-  width:260px;
-  transition:border-color .15s;
+  width:240px;
+  transition:all .15s;
+  position:relative;
 }
-.search:focus{border-color:var(--accent)}
-.search::placeholder{color:var(--ink-faint)}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-wrap::before{
+  content:"🔍";
+  position:absolute;
+  left:12px;
+  font-size:13px;
+  pointer-events:none;
+  opacity:0.5;
+}
+.search-box:focus{border-color:var(--accent);background:var(--surface)}
+
+.status-bar{
+  padding:10px 24px;
+  font-size:12px;
+  color:var(--ink-dim);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.status-bar::before{
+  content:"";
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--success);
+  box-shadow:0 0 8px var(--success);
+}
 
 .mail-scroll{
   flex:1;
   overflow-y:auto;
+  padding:8px;
 }
 
-#status{
-  padding:8px 24px;
-  font-family:var(--mono);
-  font-size:11px;
-  color:var(--ink-faint);
-  border-bottom:1px solid var(--line);
-  background:var(--panel);
-}
-
-/* MAIL ROW */
+/* MAIL CARD */
 .mail{
-  padding:16px 24px;
-  border-bottom:1px solid var(--line);
+  padding:16px 18px;
+  margin-bottom:4px;
   cursor:pointer;
+  border-radius:var(--radius-sm);
+  background:var(--surface);
+  border:1px solid transparent;
+  transition:all .15s;
   display:grid;
-  grid-template-columns:200px 1fr auto;
-  gap:6px 20px;
+  grid-template-columns:180px 1fr auto;
+  gap:6px 16px;
   align-items:center;
-  transition:background .12s;
 }
-.mail:hover{background:var(--panel)}
+.mail:hover{
+  background:var(--surface);
+  border-color:var(--border);
+  box-shadow:var(--shadow-sm);
+  transform:translateY(-1px);
+}
 .mail-from{
-  font-family:var(--mono);
-  font-size:11px;
-  color:var(--ink-dim);
-  text-transform:uppercase;
-  letter-spacing:0.8px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.mail-subject{
-  font-size:14px;
+  font-size:13px;
   font-weight:600;
   color:var(--ink);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
+.mail-subject{
+  font-size:13px;
+  color:var(--ink-2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
 .mail-date{
-  font-family:var(--mono);
+  font-size:11px;
+  color:var(--ink-dim);
+  white-space:nowrap;
+}
+.mail-meta{
+  grid-column:1 / -1;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:4px;
+  flex-wrap:wrap;
+}
+.mail-account-tag{
   font-size:10px;
-  color:var(--ink-faint);
+  color:var(--accent);
+  background:var(--accent-soft);
+  padding:2px 8px;
+  border-radius:6px;
+  font-weight:600;
   white-space:nowrap;
 }
 .mail-snippet{
-  grid-column:1 / -1;
   font-size:12px;
   color:var(--ink-dim);
   overflow:hidden;
   display:-webkit-box;
   -webkit-line-clamp:1;
   -webkit-box-orient:vertical;
-  padding-left:0;
+  line-height:1.5;
 }
-.mail-account-tag{
-  font-family:var(--mono);
-  font-size:9px;
-  color:var(--accent);
-  background:#d4ff0015;
-  padding:2px 6px;
-  border-radius:3px;
-  letter-spacing:0.5px;
+.otp-badge{
+  font-size:10px;
+  color:white;
+  background:var(--success);
+  padding:2px 8px;
+  border-radius:6px;
+  font-weight:700;
   white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px;
 }
 
 /* ============ READER ============ */
@@ -310,85 +389,148 @@ button.sm{padding:6px 10px;font-size:10px}
   flex-direction:column;
   height:100%;
   overflow:hidden;
+  background:var(--bg);
 }
 .reader.show{display:flex}
 .reader-head{
-  padding:16px 24px;
-  border-bottom:1px solid var(--line);
-  background:var(--panel);
+  padding:14px 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
   display:flex;align-items:center;gap:12px;
 }
 .reader-body{
   flex:1;
   overflow-y:auto;
-  padding:32px 40px;
+  padding:32px 48px;
+  max-width:900px;
+  width:100%;
+  margin:0 auto;
 }
 .reader-body h2{
-  font-size:24px;
+  font-size:26px;
   font-weight:700;
-  letter-spacing:-0.5px;
-  line-height:1.3;
-  margin-bottom:16px;
+  letter-spacing:-0.8px;
+  line-height:1.25;
+  margin-bottom:20px;
+  color:var(--ink);
 }
 .reader-info{
-  display:flex;flex-direction:column;gap:4px;
-  font-family:var(--mono);
-  font-size:11px;
+  display:flex;flex-direction:column;gap:8px;
+  font-size:13px;
   color:var(--ink-dim);
-  padding:14px 0 20px;
-  border-bottom:1px solid var(--line);
+  padding:18px 0;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
   margin-bottom:24px;
-  text-transform:uppercase;
-  letter-spacing:0.8px;
 }
+.reader-info div{display:flex;gap:8px}
 .reader-info strong{
-  color:var(--accent);
-  font-weight:400;
+  color:var(--ink-2);
+  font-weight:600;
+  min-width:60px;
   display:inline-block;
-  width:70px;
 }
+
+/* OTP BOX IN READER */
+.otp-box{
+  background:linear-gradient(135deg,#10b981,#059669);
+  color:white;
+  padding:20px 24px;
+  border-radius:var(--radius);
+  margin-bottom:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  box-shadow:0 8px 24px rgba(16,185,129,0.3);
+  flex-wrap:wrap;
+}
+.otp-label{
+  font-size:12px;
+  font-weight:600;
+  opacity:0.9;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:4px;
+}
+.otp-code{
+  font-size:32px;
+  font-weight:800;
+  letter-spacing:6px;
+  font-family:var(--mono);
+}
+.otp-copy-btn{
+  background:white;
+  color:#059669;
+  border:0;
+  padding:12px 20px;
+  font-size:13px;
+  font-weight:700;
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .15s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+.otp-copy-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,0.2)}
+.otp-copy-btn:active{transform:translateY(0)}
+
 .reader-content{
   white-space:pre-wrap;
   overflow-wrap:anywhere;
-  font-size:15px;
-  line-height:1.7;
-  color:var(--ink);
+  font-size:14.5px;
+  line-height:1.75;
+  color:var(--ink-2);
 }
 
 /* empty */
 .empty{
   padding:60px 30px;
   text-align:center;
-  font-family:var(--mono);
-  font-size:11px;
-  color:var(--ink-faint);
-  text-transform:uppercase;
-  letter-spacing:2px;
+  color:var(--ink-dim);
+  font-size:13px;
 }
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.4}
+
+/* toast */
+.toast{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--ink);
+  color:var(--bg);
+  padding:12px 24px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:600;
+  box-shadow:var(--shadow-lg);
+  opacity:0;
+  transition:all .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index:1000;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
 /* scrollbar */
-::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
-::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-hover)}
 
 /* mobile */
-@media(max-width:760px){
+@media(max-width:860px){
   .app{grid-template-columns:1fr;height:auto;min-height:100vh}
-  .side{
-    height:auto;
-    max-height:50vh;
-    border-right:0;border-bottom:1px solid var(--line);
-  }
-  .main{height:auto;min-height:50vh}
-  .mail{grid-template-columns:1fr auto;gap:4px 12px;padding:14px 18px}
+  .side{height:auto;max-height:45vh;border-right:0;border-bottom:1px solid var(--border)}
+  .main{height:auto;min-height:55vh}
+  .mail{grid-template-columns:1fr auto;padding:14px;gap:4px 12px}
   .mail-from{grid-column:1/-1}
   .mail-subject{grid-column:1}
   .mail-date{grid-column:2;text-align:right}
-  .search{width:100%;order:10;margin-top:4px}
-  .topbar{padding:14px 18px}
-  .reader-body{padding:20px}
+  .search-box{width:100%}
+  .topbar{padding:14px 16px}
+  .reader-body{padding:24px 20px}
   .reader-body h2{font-size:20px}
+  .otp-code{font-size:24px;letter-spacing:4px}
 }
 </style>
 </head>
@@ -399,22 +541,25 @@ button.sm{padding:6px 10px;font-size:10px}
   <!-- SIDEBAR -->
   <aside class="side">
     <div class="side-head">
-      <div class="brand">JONY MAIL</div>
+      <div class="brand"><span class="brand-dot"></span>JONY MAIL</div>
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
     </div>
 
     <div class="side-scroll">
-      <!-- FOLDER: ALL INBOX -->
-      <div class="group-label">Folders</div>
-      <div class="folder active" id="folder-all" onclick="selectAll()">
-        <span class="folder-icon">🗂</span>
-        <span class="folder-name">All Inbox</span>
-        <span class="folder-count" id="count-all">0</span>
+      <div class="side-section">
+        <div class="side-label">Mailbox</div>
+        <div class="nav-item active" id="folder-all" onclick="selectAll()">
+          <span class="nav-icon">📥</span>
+          <span class="nav-text">All Inbox</span>
+          <span class="nav-count" id="count-all">0</span>
+        </div>
       </div>
 
-      <!-- GMAIL ACCOUNTS LIST -->
-      <div class="group-label">Gmail Accounts</div>
-      <div id="accountsList">
-        <div class="empty" style="padding:16px 12px;font-size:10px;text-align:left">no accounts yet</div>
+      <div class="side-section">
+        <div class="side-label">Gmail Accounts</div>
+        <div id="accountsList">
+          <div class="empty" style="padding:20px 12px;font-size:12px">No accounts connected</div>
+        </div>
       </div>
     </div>
 
@@ -429,22 +574,28 @@ button.sm{padding:6px 10px;font-size:10px}
     <!-- LIST VIEW -->
     <div id="listView" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
       <div class="topbar">
-        <h1 id="viewTitle">All Inbox <small id="viewCount">0 messages</small></h1>
-        <input class="search" id="search" placeholder="search..." oninput="renderMails()">
-        <button class="sm" onclick="loadAll()">↻ Refresh</button>
+        <div class="page-title" id="viewTitle">All Inbox <small id="viewCount">0 messages</small></div>
+        <div class="search-wrap">
+          <input class="search-box" id="search" placeholder="Search messages..." oninput="renderMails()">
+        </div>
+        <button onclick="loadAll()">↻ Refresh</button>
       </div>
-      <div id="status">connect a gmail to begin</div>
+      <div class="status-bar" id="status">Connect your Gmail to begin</div>
       <div class="mail-scroll" id="mailList">
-        <div class="empty">no messages</div>
+        <div class="empty">
+          <div class="empty-icon">📬</div>
+          No messages yet
+        </div>
       </div>
     </div>
 
     <!-- READER VIEW -->
     <div class="reader" id="reader">
       <div class="reader-head">
-        <button class="sm" onclick="closeReader()">← Back</button>
+        <button onclick="closeReader()">← Back</button>
       </div>
       <div class="reader-body">
+        <div id="otpContainer"></div>
         <h2 id="readSubject"></h2>
         <div class="reader-info" id="readInfo"></div>
         <div class="reader-content" id="readBody"></div>
@@ -455,15 +606,42 @@ button.sm{padding:6px 10px;font-size:10px}
 
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 const CLIENT_ID = "370585861930-2mgn160ebad39s3des7js84o4ke1nkgf.apps.googleusercontent.com";
 const SCOPES = "https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.send";
 
-let accounts = [];       // [{email, token}]
-let mails = [];          // [{id, accountIndex, email, from, subject, date, snippet}]
-let currentView = "all"; // "all" or account index
+let accounts = [];
+let mails = [];
+let currentView = "all";
 
 function status(t){ document.getElementById("status").textContent = t; }
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute("data-theme") === "dark";
+  html.setAttribute("data-theme", isDark ? "light" : "dark");
+  document.getElementById("themeBtn").textContent = isDark ? "🌙" : "☀️";
+  localStorage.setItem("theme", isDark ? "light" : "dark");
+}
+// restore theme
+(function(){
+  const saved = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", saved);
+  if(document.getElementById("themeBtn")){
+    document.getElementById("themeBtn").textContent = saved === "dark" ? "☀️" : "🌙";
+  }
+})();
+
+/* ============ TOAST ============ */
+function showToast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+}
 
 /* ============ CONNECT ============ */
 function connectGmail(){
@@ -474,19 +652,19 @@ function connectGmail(){
     scope: SCOPES,
     prompt: "select_account",
     callback: async (resp) => {
-      if(resp.error){ status("login failed: " + resp.error); return; }
+      if(resp.error){ status("Login failed: " + resp.error); return; }
       const token = resp.access_token;
       try{
         const profile = await api("https://gmail.googleapis.com/gmail/v1/users/me/profile", token);
         if(accounts.some(a => a.email === profile.emailAddress)){
-          alert("This Gmail is already connected.");
+          alert("Already connected.");
           return;
         }
         accounts.push({ email: profile.emailAddress, token });
         renderAccounts();
         status(profile.emailAddress + " connected");
         loadAll();
-      }catch(e){ status("error: " + e.message); }
+      }catch(e){ status("Error: " + e.message); }
     }
   });
   client.requestAccessToken();
@@ -501,39 +679,42 @@ async function api(url, token){
   return r.json();
 }
 
-/* ============ RENDER SIDEBAR ============ */
+/* ============ SIDEBAR RENDER ============ */
 function renderAccounts(){
   const box = document.getElementById("accountsList");
 
   if(!accounts.length){
-    box.innerHTML = '<div class="empty" style="padding:16px 12px;font-size:10px;text-align:left">no accounts yet</div>';
+    box.innerHTML = '<div class="empty" style="padding:20px 12px;font-size:12px">No accounts connected</div>';
     return;
   }
 
-  box.innerHTML = accounts.map((a, i) => `
-    <div class="account-item ${currentView === i ? 'active' : ''}" onclick="selectAccount(${i})">
-      <span class="acc-dot"></span>
-      <span class="acc-email" title="${escapeHTML(a.email)}">${escapeHTML(a.email)}</span>
-      <button class="acc-remove" onclick="event.stopPropagation(); removeAccount(${i})" title="Remove">×</button>
-    </div>
-  `).join("");
+  box.innerHTML = accounts.map((a, i) => {
+    const initial = (a.email || "?").charAt(0).toUpperCase();
+    return `
+      <div class="acc-row ${currentView === i ? 'active' : ''}" onclick="selectAccount(${i})">
+        <div class="acc-avatar">${initial}</div>
+        <div class="acc-info">
+          <div class="acc-email" title="${escapeHTML(a.email)}">${escapeHTML(a.email)}</div>
+        </div>
+        <button class="acc-remove" onclick="event.stopPropagation(); removeAccount(${i})" title="Remove">×</button>
+      </div>
+    `;
+  }).join("");
 
-  // count for folder
   document.getElementById("count-all").textContent = mails.length;
 }
 
-/* ============ VIEWS ============ */
 function selectAll(){
   currentView = "all";
   document.getElementById("folder-all").classList.add("active");
-  document.querySelectorAll(".account-item").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".acc-row").forEach(el => el.classList.remove("active"));
   renderMails();
 }
 
 function selectAccount(i){
   currentView = i;
   document.getElementById("folder-all").classList.remove("active");
-  document.querySelectorAll(".account-item").forEach((el, idx) => {
+  document.querySelectorAll(".acc-row").forEach((el, idx) => {
     el.classList.toggle("active", idx === i);
   });
   renderMails();
@@ -543,8 +724,6 @@ function removeAccount(i){
   if(!confirm("Remove this Gmail from JONY MAIL?")) return;
 
   accounts.splice(i, 1);
-
-  // Rebuild mails with corrected account indexes, dropping this account's mails
   mails = mails
     .filter(m => m.accountIndex !== i)
     .map(m => m.accountIndex > i ? { ...m, accountIndex: m.accountIndex - 1 } : m);
@@ -554,16 +733,16 @@ function removeAccount(i){
 
   renderAccounts();
   renderMails();
-  status("account removed");
+  status("Account removed");
 }
 
 /* ============ LOAD MAIL ============ */
 async function loadAll(){
-  if(!accounts.length){ status("connect a gmail first"); return; }
+  if(!accounts.length){ status("Connect a Gmail first"); return; }
 
   mails = [];
-  status("loading messages...");
-  document.getElementById("mailList").innerHTML = '<div class="empty">loading...</div>';
+  status("Loading messages...");
+  document.getElementById("mailList").innerHTML = '<div class="empty">Loading...</div>';
 
   for(let i = 0; i < accounts.length; i++){
     const acc = accounts[i];
@@ -582,6 +761,8 @@ async function loadAll(){
           );
           const h = msg.payload?.headers || [];
           const get = n => h.find(x => x.name.toLowerCase() === n.toLowerCase())?.value || "";
+          const snippet = msg.snippet || "";
+          const otp = extractOTP(snippet);
 
           mails.push({
             id: item.id,
@@ -590,9 +771,10 @@ async function loadAll(){
             from: get("From"),
             subject: get("Subject") || "(no subject)",
             date: get("Date"),
-            snippet: msg.snippet || ""
+            snippet: snippet,
+            otp: otp
           });
-        }catch(e){ console.log("msg err", e); }
+        }catch(e){ console.log(e); }
       }
     }catch(e){
       status(acc.email + ": " + e.message);
@@ -600,10 +782,17 @@ async function loadAll(){
   }
 
   mails.sort((a, b) => new Date(b.date) - new Date(a.date));
-
   renderAccounts();
   renderMails();
-  status("loaded " + mails.length + " messages from " + accounts.length + " account(s)");
+  status("Loaded " + mails.length + " messages from " + accounts.length + " account(s)");
+}
+
+/* ============ OTP DETECTION ============ */
+function extractOTP(text){
+  if(!text) return null;
+  // Match 4-8 digit numbers, prefer 6-digit
+  const match = text.match(/\b(\d{6})\b/) || text.match(/\b(\d{4,8})\b/);
+  return match ? match[1] : null;
 }
 
 /* ============ RENDER MAIL LIST ============ */
@@ -611,7 +800,6 @@ function renderMails(){
   const box = document.getElementById("mailList");
   const q = (document.getElementById("search").value || "").toLowerCase();
 
-  // filter by current view + search
   const filtered = mails.filter(m => {
     const viewMatch = currentView === "all" || m.accountIndex === currentView;
     const searchMatch = q === "" ||
@@ -619,31 +807,30 @@ function renderMails(){
     return viewMatch && searchMatch;
   });
 
-  // update header
   const title = currentView === "all"
     ? "All Inbox"
     : (accounts[currentView]?.email || "Account");
   document.getElementById("viewTitle").innerHTML =
     escapeHTML(title) + ' <small>' + filtered.length + ' messages</small>';
-
-  // update folder count
   document.getElementById("count-all").textContent = mails.length;
 
   if(!filtered.length){
-    box.innerHTML = '<div class="empty">no messages</div>';
+    box.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No messages found</div>';
     return;
   }
 
   box.innerHTML = filtered.map(m => {
     const fromShort = m.from.replace(/<.*>/, "").trim() || m.from;
+    const otpBadge = m.otp ? `<span class="otp-badge">🔑 OTP ${m.otp}</span>` : "";
     return `
       <div class="mail" onclick="openMessage('${m.id}', ${m.accountIndex})">
         <div class="mail-from">${escapeHTML(fromShort)}</div>
         <div class="mail-subject">${escapeHTML(m.subject)}</div>
         <div class="mail-date">${escapeHTML(fmtDate(m.date))}</div>
-        <div class="mail-snippet">
+        <div class="mail-meta">
           <span class="mail-account-tag">${escapeHTML(m.email)}</span>
-          &nbsp;${escapeHTML(m.snippet)}
+          ${otpBadge}
+          <span class="mail-snippet">${escapeHTML(m.snippet)}</span>
         </div>
       </div>
     `;
@@ -667,7 +854,7 @@ async function openMessage(id, accIndex){
   const acc = accounts[accIndex];
   if(!acc) return;
 
-  status("opening...");
+  status("Opening message...");
   try{
     const msg = await api(
       "https://gmail.googleapis.com/gmail/v1/users/me/messages/" + id + "?format=full",
@@ -676,21 +863,57 @@ async function openMessage(id, accIndex){
 
     const h = msg.payload?.headers || [];
     const get = n => h.find(x => x.name.toLowerCase() === n.toLowerCase())?.value || "";
+    const body = extractBody(msg.payload) || msg.snippet || "(empty message)";
+
+    // detect OTP from full body (not just snippet)
+    const fullText = (get("Subject") + " " + body);
+    const otp = extractOTP(fullText);
 
     document.getElementById("readSubject").textContent = get("Subject") || "(no subject)";
     document.getElementById("readInfo").innerHTML =
-      `<div><strong>FROM</strong>${escapeHTML(get("From"))}</div>` +
-      `<div><strong>TO</strong>${escapeHTML(acc.email)}</div>` +
-      `<div><strong>DATE</strong>${escapeHTML(get("Date"))}</div>`;
-    document.getElementById("readBody").textContent =
-      extractBody(msg.payload) || msg.snippet || "(empty message)";
+      `<div><strong>From:</strong> ${escapeHTML(get("From"))}</div>` +
+      `<div><strong>To:</strong> ${escapeHTML(acc.email)}</div>` +
+      `<div><strong>Date:</strong> ${escapeHTML(get("Date"))}</div>`;
+
+    // OTP box
+    const otpContainer = document.getElementById("otpContainer");
+    if(otp){
+      otpContainer.innerHTML = `
+        <div class="otp-box">
+          <div>
+            <div class="otp-label">🔑 Verification Code</div>
+            <div class="otp-code">${escapeHTML(otp)}</div>
+          </div>
+          <button class="otp-copy-btn" onclick="copyOTP('${otp}')">📋 Copy Code</button>
+        </div>
+      `;
+    }else{
+      otpContainer.innerHTML = "";
+    }
+
+    document.getElementById("readBody").textContent = body;
 
     document.getElementById("listView").style.display = "none";
     document.getElementById("reader").classList.add("show");
-    status("reading");
+    status("Reading message");
   }catch(e){
-    status("could not open: " + e.message);
+    status("Could not open: " + e.message);
   }
+}
+
+function copyOTP(code){
+  navigator.clipboard.writeText(code).then(() => {
+    showToast("✓ Copied: " + code);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast("✓ Copied: " + code);
+  });
 }
 
 function closeReader(){
