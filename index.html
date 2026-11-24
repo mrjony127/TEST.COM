@@ -1,947 +1,675 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f7f7f8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090909">
 <title>JONY MAIL</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
-:root{
-  --bg:#f5f5f7;
-  --surface:#ffffff;
-  --surface-2:#fafafa;
-  --border:#e5e5e7;
-  --border-hover:#d0d0d3;
-  --ink:#1d1d1f;
-  --ink-2:#494949;
-  --ink-dim:#86868b;
-  --ink-faint:#c7c7cc;
-  --accent:#2563eb;
-  --accent-hover:#1d4ed8;
-  --accent-soft:#eff6ff;
-  --danger:#ef4444;
-  --success:#10b981;
-  --radius:14px;
-  --radius-sm:10px;
-  --shadow-sm:0 1px 2px rgba(0,0,0,0.04);
-  --shadow:0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg:0 12px 32px rgba(0,0,0,0.12);
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter",Roboto,Helvetica,Arial,sans-serif;
-  --mono:"SF Mono","Menlo","Consolas",monospace;
-}
-[data-theme="dark"]{
-  --bg:#0a0a0b;
-  --surface:#141416;
-  --surface-2:#1a1a1d;
-  --border:#26262a;
-  --border-hover:#3a3a40;
-  --ink:#f5f5f7;
-  --ink-2:#c7c7cc;
-  --ink-dim:#86868b;
-  --ink-faint:#48484d;
-  --accent:#3b82f6;
-  --accent-hover:#60a5fa;
-  --accent-soft:#1e3a5f;
-  --shadow-sm:0 1px 2px rgba(0,0,0,0.3);
-  --shadow:0 4px 12px rgba(0,0,0,0.4);
-  --shadow-lg:0 12px 32px rgba(0,0,0,0.6);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:var(--font);
-  font-size:14px;
-  -webkit-font-smoothing:antialiased;
-  transition:background .3s, color .3s;
-}
-
-.app{
-  display:grid;
-  grid-template-columns:300px 1fr;
-  height:100vh;
-  overflow:hidden;
-}
-
-/* ============ SIDEBAR ============ */
-.side{
-  background:var(--surface);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  height:100vh;
-  overflow:hidden;
-  transition:background .3s, border-color .3s;
-}
-
-.side-head{
-  padding:20px 20px 16px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;
-}
-.brand{
-  font-size:20px;
-  font-weight:800;
-  letter-spacing:-0.5px;
-  color:var(--ink);
-  display:flex;align-items:center;gap:8px;
-}
-.brand-dot{
-  width:10px;height:10px;
-  background:var(--accent);
-  border-radius:50%;
-  box-shadow:0 0 12px var(--accent);
-}
-.icon-btn{
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  color:var(--ink-2);
-  width:34px;height:34px;
-  border-radius:50%;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;
-  transition:all .15s;
-}
-.icon-btn:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
-
-.side-scroll{
-  flex:1;
-  overflow-y:auto;
-  padding:16px 12px;
-}
-
-.side-section{margin-bottom:24px}
-.side-label{
-  font-size:11px;
-  font-weight:600;
-  color:var(--ink-dim);
-  text-transform:uppercase;
-  letter-spacing:1px;
-  padding:0 12px 8px;
-}
-
-.nav-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:11px 14px;
-  border-radius:var(--radius-sm);
-  cursor:pointer;
-  color:var(--ink-2);
-  font-size:13.5px;
-  font-weight:500;
-  transition:all .15s;
-  position:relative;
-  margin-bottom:2px;
-}
-.nav-item:hover{background:var(--surface-2);color:var(--ink)}
-.nav-item.active{
-  background:var(--accent-soft);
-  color:var(--accent);
-  font-weight:600;
-}
-[data-theme="dark"] .nav-item.active{background:var(--accent-soft);color:#93c5fd}
-.nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
-.nav-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nav-count{
-  font-size:11px;
-  background:var(--surface-2);
-  color:var(--ink-dim);
-  padding:2px 8px;
-  border-radius:10px;
-  font-weight:600;
-  min-width:24px;text-align:center;
-}
-.nav-item.active .nav-count{
-  background:var(--accent);
-  color:white;
-}
-
-/* account row */
-.acc-row{
-  display:flex;align-items:center;
-  gap:10px;
-  padding:10px 14px;
-  border-radius:var(--radius-sm);
-  cursor:pointer;
-  transition:all .15s;
-  margin-bottom:2px;
-}
-.acc-row:hover{background:var(--surface-2)}
-.acc-row.active{background:var(--accent-soft)}
-[data-theme="dark"] .acc-row.active{background:var(--accent-soft)}
-.acc-avatar{
-  width:28px;height:28px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#3b82f6,#8b5cf6);
-  color:white;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:600;
-  font-size:13px;
-  flex-shrink:0;
-}
-.acc-info{flex:1;overflow:hidden}
-.acc-email{
-  font-size:13px;
-  color:var(--ink);
-  font-weight:500;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.acc-row.active .acc-email{color:var(--accent)}
-.acc-remove{
-  background:none;border:0;
-  color:var(--ink-faint);
-  cursor:pointer;
-  font-size:18px;
-  padding:0 4px;
-  line-height:1;
-  opacity:0;
-  transition:opacity .15s;
-}
-.acc-row:hover .acc-remove{opacity:1}
-.acc-remove:hover{color:var(--danger)}
-
-.side-foot{
-  padding:14px;
-  border-top:1px solid var(--border);
-}
-
-/* buttons */
-button{
-  font-family:var(--font);
-  font-size:13px;
-  font-weight:600;
-  padding:10px 16px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:var(--surface);
-  color:var(--ink);
-  cursor:pointer;
-  transition:all .15s;
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-}
-button:hover{border-color:var(--border-hover);background:var(--surface-2)}
-button.primary{
-  background:var(--accent);
-  border-color:var(--accent);
-  color:white;
-  width:100%;
-  box-shadow:0 2px 8px rgba(37,99,235,0.25);
-}
-button.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);box-shadow:0 4px 12px rgba(37,99,235,0.35)}
-
-/* ============ MAIN ============ */
-.main{
-  display:flex;flex-direction:column;
-  overflow:hidden;
-  background:var(--bg);
-}
-
-.topbar{
-  padding:16px 24px;
-  border-bottom:1px solid var(--border);
-  background:var(--surface);
-  display:flex;align-items:center;gap:12px;
-  flex-wrap:wrap;
-  transition:background .3s, border-color .3s;
-}
-.page-title{
-  font-size:20px;
-  font-weight:700;
-  letter-spacing:-0.5px;
-  color:var(--ink);
-  flex:1;
-  min-width:100px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.page-title small{
-  font-size:12px;
-  color:var(--ink-dim);
-  font-weight:500;
-  margin-left:8px;
-}
-
-.search-box{
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:9px 14px 9px 36px;
-  color:var(--ink);
-  font-family:var(--font);
-  font-size:13px;
-  outline:none;
-  width:240px;
-  transition:all .15s;
-  position:relative;
-}
-.search-wrap{position:relative;display:flex;align-items:center}
-.search-wrap::before{
-  content:"🔍";
-  position:absolute;
-  left:12px;
-  font-size:13px;
-  pointer-events:none;
-  opacity:0.5;
-}
-.search-box:focus{border-color:var(--accent);background:var(--surface)}
-
-.status-bar{
-  padding:10px 24px;
-  font-size:12px;
-  color:var(--ink-dim);
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:8px;
-}
-.status-bar::before{
-  content:"";
-  width:6px;height:6px;
-  border-radius:50%;
-  background:var(--success);
-  box-shadow:0 0 8px var(--success);
-}
-
-.mail-scroll{
-  flex:1;
-  overflow-y:auto;
-  padding:8px;
-}
-
-/* MAIL CARD */
-.mail{
-  padding:16px 18px;
-  margin-bottom:4px;
-  cursor:pointer;
-  border-radius:var(--radius-sm);
-  background:var(--surface);
-  border:1px solid transparent;
-  transition:all .15s;
-  display:grid;
-  grid-template-columns:180px 1fr auto;
-  gap:6px 16px;
-  align-items:center;
-}
-.mail:hover{
-  background:var(--surface);
-  border-color:var(--border);
-  box-shadow:var(--shadow-sm);
-  transform:translateY(-1px);
-}
-.mail-from{
-  font-size:13px;
-  font-weight:600;
-  color:var(--ink);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.mail-subject{
-  font-size:13px;
-  color:var(--ink-2);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.mail-date{
-  font-size:11px;
-  color:var(--ink-dim);
-  white-space:nowrap;
-}
-.mail-meta{
-  grid-column:1 / -1;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin-top:4px;
-  flex-wrap:wrap;
-}
-.mail-account-tag{
-  font-size:10px;
-  color:var(--accent);
-  background:var(--accent-soft);
-  padding:2px 8px;
-  border-radius:6px;
-  font-weight:600;
-  white-space:nowrap;
-}
-.mail-snippet{
-  font-size:12px;
-  color:var(--ink-dim);
-  overflow:hidden;
-  display:-webkit-box;
-  -webkit-line-clamp:1;
-  -webkit-box-orient:vertical;
-  line-height:1.5;
-}
-.otp-badge{
-  font-size:10px;
-  color:white;
-  background:var(--success);
-  padding:2px 8px;
-  border-radius:6px;
-  font-weight:700;
-  white-space:nowrap;
-  display:inline-flex;align-items:center;gap:4px;
-}
-
-/* ============ READER ============ */
-.reader{
-  display:none;
-  flex-direction:column;
-  height:100%;
-  overflow:hidden;
-  background:var(--bg);
-}
-.reader.show{display:flex}
-.reader-head{
-  padding:14px 24px;
-  border-bottom:1px solid var(--border);
-  background:var(--surface);
-  display:flex;align-items:center;gap:12px;
-}
-.reader-body{
-  flex:1;
-  overflow-y:auto;
-  padding:32px 48px;
-  max-width:900px;
-  width:100%;
-  margin:0 auto;
-}
-.reader-body h2{
-  font-size:26px;
-  font-weight:700;
-  letter-spacing:-0.8px;
-  line-height:1.25;
-  margin-bottom:20px;
-  color:var(--ink);
-}
-.reader-info{
-  display:flex;flex-direction:column;gap:8px;
-  font-size:13px;
-  color:var(--ink-dim);
-  padding:18px 0;
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  margin-bottom:24px;
-}
-.reader-info div{display:flex;gap:8px}
-.reader-info strong{
-  color:var(--ink-2);
-  font-weight:600;
-  min-width:60px;
-  display:inline-block;
-}
-
-/* OTP BOX IN READER */
-.otp-box{
-  background:linear-gradient(135deg,#10b981,#059669);
-  color:white;
-  padding:20px 24px;
-  border-radius:var(--radius);
-  margin-bottom:24px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  box-shadow:0 8px 24px rgba(16,185,129,0.3);
-  flex-wrap:wrap;
-}
-.otp-label{
-  font-size:12px;
-  font-weight:600;
-  opacity:0.9;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:4px;
-}
-.otp-code{
-  font-size:32px;
-  font-weight:800;
-  letter-spacing:6px;
-  font-family:var(--mono);
-}
-.otp-copy-btn{
-  background:white;
-  color:#059669;
-  border:0;
-  padding:12px 20px;
-  font-size:13px;
-  font-weight:700;
-  border-radius:10px;
-  cursor:pointer;
-  transition:all .15s;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-.otp-copy-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,0.2)}
-.otp-copy-btn:active{transform:translateY(0)}
-
-.reader-content{
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-  font-size:14.5px;
-  line-height:1.75;
-  color:var(--ink-2);
-}
-
-/* empty */
-.empty{
-  padding:60px 30px;
-  text-align:center;
-  color:var(--ink-dim);
-  font-size:13px;
-}
-.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.4}
-
-/* toast */
-.toast{
-  position:fixed;
-  bottom:24px;
-  left:50%;
-  transform:translateX(-50%) translateY(100px);
-  background:var(--ink);
-  color:var(--bg);
-  padding:12px 24px;
-  border-radius:12px;
-  font-size:13px;
-  font-weight:600;
-  box-shadow:var(--shadow-lg);
-  opacity:0;
-  transition:all .3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index:1000;
-  display:flex;align-items:center;gap:8px;
-}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-
-/* scrollbar */
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px}
-::-webkit-scrollbar-thumb:hover{background:var(--border-hover)}
-
-/* mobile */
-@media(max-width:860px){
-  .app{grid-template-columns:1fr;height:auto;min-height:100vh}
-  .side{height:auto;max-height:45vh;border-right:0;border-bottom:1px solid var(--border)}
-  .main{height:auto;min-height:55vh}
-  .mail{grid-template-columns:1fr auto;padding:14px;gap:4px 12px}
-  .mail-from{grid-column:1/-1}
-  .mail-subject{grid-column:1}
-  .mail-date{grid-column:2;text-align:right}
-  .search-box{width:100%}
-  .topbar{padding:14px 16px}
-  .reader-body{padding:24px 20px}
-  .reader-body h2{font-size:20px}
-  .otp-code{font-size:24px;letter-spacing:4px}
-}
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:#eee;font-family:Arial,sans-serif}
+header{padding:17px;background:#111;border-bottom:1px solid #ff3030;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:bold;color:#ff3030}
+.container{max-width:1100px;margin:auto;padding:15px}
+.card{background:#141414;border:1px solid #292929;border-radius:13px;padding:17px;margin-bottom:15px}
+h2,h3{color:#ff4545;margin-top:0}
+p{color:#aaa;line-height:1.5}
+input{width:100%;padding:13px;background:#090909;border:1px solid #444;border-radius:8px;color:white;margin:7px 0 13px;outline:none}
+input:focus{border-color:#ff3030}
+button{border:0;background:#ff3030;color:white;padding:12px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
+button.secondary{background:#292929;color:white}
+button.danger{background:#541818}
+button:disabled{opacity:.5}
+.full{width:100%;margin:5px 0}
+.hidden{display:none!important}
+.auth{max-width:430px;margin:45px auto}
+.auth h1{text-align:center;color:#ff3030}
+.auth .subtitle{text-align:center}
+.divider{text-align:center;color:#777;margin:12px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.stat{background:#171717;border:1px solid #333;padding:15px;border-radius:10px;flex:1;min-width:130px}
+.stat strong{display:block;color:#ff3030;font-size:25px;margin-bottom:5px}
+.account{background:#202020;padding:12px;border-radius:9px;margin:7px 0;overflow-wrap:anywhere}
+.account button{padding:7px 10px;margin:7px 5px 0 0;font-size:12px}
+.mail{padding:14px 5px;border-bottom:1px solid #333;cursor:pointer}
+.mail:hover{background:#202020}
+.mail strong{color:#fff}
+.mail small{display:block;color:#ff5555;margin-top:7px}
+.subject{margin-top:6px;color:#ccc}
+.date{font-size:11px;color:#888;margin-top:6px}
+.tag{display:inline-block;background:#451616;color:#ff7777;padding:5px 8px;border-radius:5px;font-size:11px;margin-top:7px}
+#reader{white-space:pre-wrap;overflow-wrap:anywhere}
+#readBody{line-height:1.6;color:#ddd}
+#status{color:#ff7777;font-size:13px;margin:10px 0}
+.empty{text-align:center;padding:25px;color:#888}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1}
+footer{text-align:center;color:#666;padding:25px;font-size:12px}
+a{color:#ff5555;cursor:pointer}
+@media(max-width:500px){header{padding:13px}.logo{font-size:20px}.container{padding:10px}.card{padding:13px}}
 </style>
 </head>
+
 <body>
 
-<div class="app">
+<header>
+  <div class="logo">⚡ JONY MAIL</div>
+  <button id="logoutBtn" class="secondary hidden">LOGOUT</button>
+</header>
 
-  <!-- SIDEBAR -->
-  <aside class="side">
-    <div class="side-head">
-      <div class="brand"><span class="brand-dot"></span>JONY MAIL</div>
-      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+<!-- LOGIN -->
+<section id="authScreen" class="auth card">
+  <h1>JONY MAIL</h1>
+  <p class="subtitle">Your Gmail Dashboard</p>
+
+  <div id="loginForm">
+    <h3>Welcome Back</h3>
+    <label>Email Address</label>
+    <input id="loginEmail" type="email" placeholder="Enter your email">
+
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="Enter password">
+
+    <button class="full" id="loginBtn">LOGIN</button>
+    <button class="full secondary" id="googleLoginBtn">CONTINUE WITH GOOGLE</button>
+
+    <p style="text-align:center">
+      <a id="forgotBtn">Forgot Password?</a>
+    </p>
+    <p style="text-align:center">
+      New user? <a id="showSignup">Create Account</a>
+    </p>
+  </div>
+
+  <div id="signupForm" class="hidden">
+    <h3>Create Account</h3>
+    <label>Your Name</label>
+    <input id="signupName" type="text" placeholder="Your name">
+
+    <label>Email Address</label>
+    <input id="signupEmail" type="email" placeholder="Enter email">
+
+    <label>Password</label>
+    <input id="signupPassword" type="password" placeholder="At least 6 characters">
+
+    <button class="full" id="signupBtn">CREATE ACCOUNT</button>
+    <p style="text-align:center">
+      Already registered? <a id="showLogin">Login</a>
+    </p>
+  </div>
+
+  <div id="authStatus"></div>
+</section>
+
+<!-- DASHBOARD -->
+<main id="dashboard" class="container hidden">
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div>
+        <h3>JONY MAIL DASHBOARD</h3>
+        <div id="userEmail" style="color:#aaa;overflow-wrap:anywhere"></div>
+      </div>
+      <button id="connectBtn">+ CONNECT GMAIL</button>
+    </div>
+    <div id="status">Dashboard ready.</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="accountCount">0</strong>
+      Connected Gmail
+    </div>
+    <div class="stat">
+      <strong id="mailCount">0</strong>
+      Total Messages
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>CONNECTED GMAIL ACCOUNTS</h3>
+    <div id="accounts">
+      <div class="empty">No Gmail connected yet.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ALL INBOX</h3>
+    <input id="search" placeholder="Search sender, subject or OTP..." oninput="renderMails()">
+
+    <div class="actions">
+      <button onclick="filterAccount('all')">ALL ACCOUNTS</button>
+      <button class="secondary" onclick="loadAll()">↻ REFRESH</button>
     </div>
 
-    <div class="side-scroll">
-      <div class="side-section">
-        <div class="side-label">Mailbox</div>
-        <div class="nav-item active" id="folder-all" onclick="selectAll()">
-          <span class="nav-icon">📥</span>
-          <span class="nav-text">All Inbox</span>
-          <span class="nav-count" id="count-all">0</span>
-        </div>
-      </div>
-
-      <div class="side-section">
-        <div class="side-label">Gmail Accounts</div>
-        <div id="accountsList">
-          <div class="empty" style="padding:20px 12px;font-size:12px">No accounts connected</div>
-        </div>
-      </div>
+    <div id="mailList">
+      <div class="empty">Connect Gmail to view messages.</div>
     </div>
+  </div>
 
-    <div class="side-foot">
-      <button class="primary" onclick="connectGmail()">+ Connect Gmail</button>
-    </div>
-  </aside>
+  <div class="card hidden" id="reader">
+    <button class="secondary" onclick="closeReader()">← BACK</button>
+    <h3 id="readSubject"></h3>
+    <div id="readInfo"></div>
+    <hr style="border-color:#333">
+    <div id="readBody"></div>
+    <div id="otpArea"></div>
+  </div>
 
-  <!-- MAIN -->
-  <main class="main">
+</main>
 
-    <!-- LIST VIEW -->
-    <div id="listView" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
-      <div class="topbar">
-        <div class="page-title" id="viewTitle">All Inbox <small id="viewCount">0 messages</small></div>
-        <div class="search-wrap">
-          <input class="search-box" id="search" placeholder="Search messages..." oninput="renderMails()">
-        </div>
-        <button onclick="loadAll()">↻ Refresh</button>
-      </div>
-      <div class="status-bar" id="status">Connect your Gmail to begin</div>
-      <div class="mail-scroll" id="mailList">
-        <div class="empty">
-          <div class="empty-icon">📬</div>
-          No messages yet
-        </div>
-      </div>
-    </div>
-
-    <!-- READER VIEW -->
-    <div class="reader" id="reader">
-      <div class="reader-head">
-        <button onclick="closeReader()">← Back</button>
-      </div>
-      <div class="reader-body">
-        <div id="otpContainer"></div>
-        <h2 id="readSubject"></h2>
-        <div class="reader-info" id="readInfo"></div>
-        <div class="reader-content" id="readBody"></div>
-      </div>
-    </div>
-
-  </main>
-
-</div>
-
-<div class="toast" id="toast"></div>
+<footer>JONY MAIL · ALL YOUR GMAIL IN ONE PLACE</footer>
 
 <script>
-const CLIENT_ID = "370585861930-2mgn160ebad39s3des7js84o4ke1nkgf.apps.googleusercontent.com";
-const SCOPES = "https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.send";
+/* FIREBASE CONFIGURATION */
+const firebaseConfig = {
+  apiKey: "AIzaSyCnd_LT7H3o5HHbTFAZAHo6e2donTrN6sM",
+  authDomain: "jony-mail-hub-2466c.firebaseapp.com",
+  projectId: "jony-mail-hub-2466c",
+  storageBucket: "jony-mail-hub-2466c.firebasestorage.app",
+  messagingSenderId: "370585861930",
+  appId: "1:370585861930:web:e70dc809dd7c91046e2853",
+  measurementId: "G-2NMMQWBNQE"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+const CLIENT_ID =
+"370585861930-2mgn160ebad39s3des7js84o4ke1nkgf.apps.googleusercontent.com";
+
+const SCOPES = "https://www.googleapis.com/auth/gmail.readonly";
+
+const MAX_ACCOUNTS = 20;
 
 let accounts = [];
 let mails = [];
-let currentView = "all";
+let selectedAccount = "all";
+let tokenClient = null;
+let currentUser = null;
 
-function status(t){ document.getElementById("status").textContent = t; }
+const $ = id => document.getElementById(id);
 
-function toggleTheme(){
-  const html = document.documentElement;
-  const isDark = html.getAttribute("data-theme") === "dark";
-  html.setAttribute("data-theme", isDark ? "light" : "dark");
-  document.getElementById("themeBtn").textContent = isDark ? "🌙" : "☀️";
-  localStorage.setItem("theme", isDark ? "light" : "dark");
-}
-// restore theme
-(function(){
-  const saved = localStorage.getItem("theme") || "light";
-  document.documentElement.setAttribute("data-theme", saved);
-  if(document.getElementById("themeBtn")){
-    document.getElementById("themeBtn").textContent = saved === "dark" ? "☀️" : "🌙";
-  }
-})();
-
-/* ============ TOAST ============ */
-function showToast(msg){
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.classList.add("show");
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+function authMessage(message){
+  $("authStatus").textContent = message;
 }
 
-/* ============ CONNECT ============ */
-function connectGmail(){
-  if(!window.google){ alert("Google Login loading, try again."); return; }
-
-  const client = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    prompt: "select_account",
-    callback: async (resp) => {
-      if(resp.error){ status("Login failed: " + resp.error); return; }
-      const token = resp.access_token;
-      try{
-        const profile = await api("https://gmail.googleapis.com/gmail/v1/users/me/profile", token);
-        if(accounts.some(a => a.email === profile.emailAddress)){
-          alert("Already connected.");
-          return;
-        }
-        accounts.push({ email: profile.emailAddress, token });
-        renderAccounts();
-        status(profile.emailAddress + " connected");
-        loadAll();
-      }catch(e){ status("Error: " + e.message); }
-    }
-  });
-  client.requestAccessToken();
+function status(message){
+  $("status").textContent = message;
 }
 
-async function api(url, token){
-  const r = await fetch(url, { headers:{ Authorization: "Bearer " + token } });
-  if(!r.ok){
-    const e = await r.json().catch(()=>({}));
-    throw new Error(e.error?.message || r.statusText);
-  }
-  return r.json();
-}
+/* LOGIN / SIGNUP SWITCH */
+$("showSignup").onclick = () => {
+  $("loginForm").classList.add("hidden");
+  $("signupForm").classList.remove("hidden");
+  authMessage("");
+};
 
-/* ============ SIDEBAR RENDER ============ */
-function renderAccounts(){
-  const box = document.getElementById("accountsList");
+$("showLogin").onclick = () => {
+  $("signupForm").classList.add("hidden");
+  $("loginForm").classList.remove("hidden");
+  authMessage("");
+};
 
-  if(!accounts.length){
-    box.innerHTML = '<div class="empty" style="padding:20px 12px;font-size:12px">No accounts connected</div>';
+/* EMAIL PASSWORD LOGIN */
+$("loginBtn").onclick = async () => {
+  const email = $("loginEmail").value.trim();
+  const password = $("loginPassword").value;
+
+  if(!email || !password){
+    authMessage("Email এবং Password লিখুন।");
     return;
   }
 
-  box.innerHTML = accounts.map((a, i) => {
-    const initial = (a.email || "?").charAt(0).toUpperCase();
-    return `
-      <div class="acc-row ${currentView === i ? 'active' : ''}" onclick="selectAccount(${i})">
-        <div class="acc-avatar">${initial}</div>
-        <div class="acc-info">
-          <div class="acc-email" title="${escapeHTML(a.email)}">${escapeHTML(a.email)}</div>
-        </div>
-        <button class="acc-remove" onclick="event.stopPropagation(); removeAccount(${i})" title="Remove">×</button>
-      </div>
-    `;
-  }).join("");
-
-  document.getElementById("count-all").textContent = mails.length;
-}
-
-function selectAll(){
-  currentView = "all";
-  document.getElementById("folder-all").classList.add("active");
-  document.querySelectorAll(".acc-row").forEach(el => el.classList.remove("active"));
-  renderMails();
-}
-
-function selectAccount(i){
-  currentView = i;
-  document.getElementById("folder-all").classList.remove("active");
-  document.querySelectorAll(".acc-row").forEach((el, idx) => {
-    el.classList.toggle("active", idx === i);
-  });
-  renderMails();
-}
-
-function removeAccount(i){
-  if(!confirm("Remove this Gmail from JONY MAIL?")) return;
-
-  accounts.splice(i, 1);
-  mails = mails
-    .filter(m => m.accountIndex !== i)
-    .map(m => m.accountIndex > i ? { ...m, accountIndex: m.accountIndex - 1 } : m);
-
-  if(currentView === i) currentView = "all";
-  else if(typeof currentView === "number" && currentView > i) currentView--;
-
-  renderAccounts();
-  renderMails();
-  status("Account removed");
-}
-
-/* ============ LOAD MAIL ============ */
-async function loadAll(){
-  if(!accounts.length){ status("Connect a Gmail first"); return; }
-
-  mails = [];
-  status("Loading messages...");
-  document.getElementById("mailList").innerHTML = '<div class="empty">Loading...</div>';
-
-  for(let i = 0; i < accounts.length; i++){
-    const acc = accounts[i];
-    try{
-      const res = await api(
-        "https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=40",
-        acc.token
-      );
-
-      for(const item of (res.messages || [])){
-        try{
-          const msg = await api(
-            "https://gmail.googleapis.com/gmail/v1/users/me/messages/" + item.id +
-            "?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date",
-            acc.token
-          );
-          const h = msg.payload?.headers || [];
-          const get = n => h.find(x => x.name.toLowerCase() === n.toLowerCase())?.value || "";
-          const snippet = msg.snippet || "";
-          const otp = extractOTP(snippet);
-
-          mails.push({
-            id: item.id,
-            accountIndex: i,
-            email: acc.email,
-            from: get("From"),
-            subject: get("Subject") || "(no subject)",
-            date: get("Date"),
-            snippet: snippet,
-            otp: otp
-          });
-        }catch(e){ console.log(e); }
-      }
-    }catch(e){
-      status(acc.email + ": " + e.message);
-    }
+  try{
+    authMessage("Logging in...");
+    await auth.signInWithEmailAndPassword(email,password);
+    authMessage("");
+  }catch(error){
+    authMessage(firebaseError(error));
   }
+};
 
-  mails.sort((a, b) => new Date(b.date) - new Date(a.date));
-  renderAccounts();
-  renderMails();
-  status("Loaded " + mails.length + " messages from " + accounts.length + " account(s)");
-}
+/* CREATE ACCOUNT */
+$("signupBtn").onclick = async () => {
+  const name = $("signupName").value.trim();
+  const email = $("signupEmail").value.trim();
+  const password = $("signupPassword").value;
 
-/* ============ OTP DETECTION ============ */
-function extractOTP(text){
-  if(!text) return null;
-  // Match 4-8 digit numbers, prefer 6-digit
-  const match = text.match(/\b(\d{6})\b/) || text.match(/\b(\d{4,8})\b/);
-  return match ? match[1] : null;
-}
-
-/* ============ RENDER MAIL LIST ============ */
-function renderMails(){
-  const box = document.getElementById("mailList");
-  const q = (document.getElementById("search").value || "").toLowerCase();
-
-  const filtered = mails.filter(m => {
-    const viewMatch = currentView === "all" || m.accountIndex === currentView;
-    const searchMatch = q === "" ||
-      (m.from + " " + m.subject + " " + m.snippet + " " + m.email).toLowerCase().includes(q);
-    return viewMatch && searchMatch;
-  });
-
-  const title = currentView === "all"
-    ? "All Inbox"
-    : (accounts[currentView]?.email || "Account");
-  document.getElementById("viewTitle").innerHTML =
-    escapeHTML(title) + ' <small>' + filtered.length + ' messages</small>';
-  document.getElementById("count-all").textContent = mails.length;
-
-  if(!filtered.length){
-    box.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No messages found</div>';
+  if(!name || !email || !password){
+    authMessage("সব তথ্য পূরণ করুন।");
     return;
   }
 
-  box.innerHTML = filtered.map(m => {
-    const fromShort = m.from.replace(/<.*>/, "").trim() || m.from;
-    const otpBadge = m.otp ? `<span class="otp-badge">🔑 OTP ${m.otp}</span>` : "";
-    return `
-      <div class="mail" onclick="openMessage('${m.id}', ${m.accountIndex})">
-        <div class="mail-from">${escapeHTML(fromShort)}</div>
-        <div class="mail-subject">${escapeHTML(m.subject)}</div>
-        <div class="mail-date">${escapeHTML(fmtDate(m.date))}</div>
-        <div class="mail-meta">
-          <span class="mail-account-tag">${escapeHTML(m.email)}</span>
-          ${otpBadge}
-          <span class="mail-snippet">${escapeHTML(m.snippet)}</span>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
+  if(password.length < 6){
+    authMessage("Password কমপক্ষে ৬ অক্ষরের হতে হবে।");
+    return;
+  }
 
-function fmtDate(d){
-  if(!d) return "";
   try{
-    const dt = new Date(d);
-    const now = new Date();
-    if(dt.toDateString() === now.toDateString()){
-      return dt.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
-    }
-    return dt.toLocaleDateString([], { month:"short", day:"2-digit" });
-  }catch{ return d; }
-}
+    authMessage("Creating account...");
 
-/* ============ READ MESSAGE ============ */
-async function openMessage(id, accIndex){
-  const acc = accounts[accIndex];
-  if(!acc) return;
-
-  status("Opening message...");
-  try{
-    const msg = await api(
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages/" + id + "?format=full",
-      acc.token
+    const result = await auth.createUserWithEmailAndPassword(
+      email,password
     );
 
-    const h = msg.payload?.headers || [];
-    const get = n => h.find(x => x.name.toLowerCase() === n.toLowerCase())?.value || "";
-    const body = extractBody(msg.payload) || msg.snippet || "(empty message)";
+    await result.user.updateProfile({
+      displayName:name
+    });
 
-    // detect OTP from full body (not just snippet)
-    const fullText = (get("Subject") + " " + body);
-    const otp = extractOTP(fullText);
+    await result.user.reload();
+    authMessage("");
+  }catch(error){
+    authMessage(firebaseError(error));
+  }
+};
 
-    document.getElementById("readSubject").textContent = get("Subject") || "(no subject)";
-    document.getElementById("readInfo").innerHTML =
-      `<div><strong>From:</strong> ${escapeHTML(get("From"))}</div>` +
-      `<div><strong>To:</strong> ${escapeHTML(acc.email)}</div>` +
-      `<div><strong>Date:</strong> ${escapeHTML(get("Date"))}</div>`;
+/* GOOGLE LOGIN */
+$("googleLoginBtn").onclick = async () => {
+  try{
+    authMessage("Opening Google Login...");
+    await auth.signInWithPopup(googleProvider);
+    authMessage("");
+  }catch(error){
+    authMessage(firebaseError(error));
+  }
+};
 
-    // OTP box
-    const otpContainer = document.getElementById("otpContainer");
-    if(otp){
-      otpContainer.innerHTML = `
-        <div class="otp-box">
-          <div>
-            <div class="otp-label">🔑 Verification Code</div>
-            <div class="otp-code">${escapeHTML(otp)}</div>
-          </div>
-          <button class="otp-copy-btn" onclick="copyOTP('${otp}')">📋 Copy Code</button>
-        </div>
-      `;
-    }else{
-      otpContainer.innerHTML = "";
+/* FORGOT PASSWORD */
+$("forgotBtn").onclick = async () => {
+  const email = $("loginEmail").value.trim();
+
+  if(!email){
+    authMessage("আগে Email Address লিখুন।");
+    return;
+  }
+
+  try{
+    await auth.sendPasswordResetEmail(email);
+    authMessage("Password reset link আপনার Email-এ পাঠানো হয়েছে।");
+  }catch(error){
+    authMessage(firebaseError(error));
+  }
+};
+
+/* LOGOUT */
+$("logoutBtn").onclick = async () => {
+  if(!confirm("আপনি কি Logout করতে চান?")) return;
+
+  accounts = [];
+  mails = [];
+  await auth.signOut();
+};
+
+/* AUTH SESSION */
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+
+  if(user){
+    $("authScreen").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    $("logoutBtn").classList.remove("hidden");
+
+    $("userEmail").textContent =
+      (user.displayName || "User") + " · " + user.email;
+
+    status("Login successful. Connect your Gmail.");
+  }else{
+    $("authScreen").classList.remove("hidden");
+    $("dashboard").classList.add("hidden");
+    $("logoutBtn").classList.add("hidden");
+
+    accounts = [];
+    mails = [];
+    renderAccounts();
+    renderMails();
+  }
+});
+
+/* FIREBASE ERROR MESSAGE */
+function firebaseError(error){
+  const messages = {
+    "auth/invalid-email":"Email Address সঠিক নয়।",
+    "auth/user-not-found":"এই Email দিয়ে কোনো Account পাওয়া যায়নি।",
+    "auth/wrong-password":"Password ভুল হয়েছে।",
+    "auth/invalid-credential":"Email অথবা Password ভুল।",
+    "auth/email-already-in-use":"এই Email দিয়ে Account আগে থেকেই আছে।",
+    "auth/weak-password":"আরও শক্তিশালী Password দিন।",
+    "auth/network-request-failed":"Internet Connection পরীক্ষা করুন।",
+    "auth/popup-blocked":"Google Login Popup Block হয়েছে।",
+    "auth/operation-not-allowed":"Firebase Console-এ এই Login Method চালু করুন।"
+  };
+
+  return messages[error.code] || error.message;
+}
+
+/* GOOGLE GMAIL CONNECTION */
+function connectGmail(){
+  if(!currentUser){
+    alert("আগে JONY MAIL-এ Login করুন।");
+    return;
+  }
+
+  if(accounts.length >= MAX_ACCOUNTS){
+    alert("সর্বোচ্চ ২০টি Gmail Connect করা যাবে।");
+    return;
+  }
+
+  if(!window.google || !google.accounts){
+    alert("Google service loading. আবার চেষ্টা করুন।");
+    return;
+  }
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,
+    scope:SCOPES,
+    prompt:"select_account",
+    callback:async response => {
+      if(response.error){
+        status("Gmail connection failed: "+response.error);
+        return;
+      }
+
+      try{
+        const profile = await gmailApi(
+          "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+          response.access_token
+        );
+
+        if(accounts.some(a=>a.email===profile.emailAddress)){
+          alert("এই Gmail আগে থেকেই Connect করা আছে।");
+          return;
+        }
+
+        accounts.push({
+          id:crypto.randomUUID(),
+          email:profile.emailAddress,
+          token:response.access_token
+        });
+
+        renderAccounts();
+        status(profile.emailAddress+" connected successfully.");
+
+        await loadAll();
+      }catch(error){
+        status("Gmail Error: "+error.message);
+      }
     }
+  });
 
-    document.getElementById("readBody").textContent = body;
+  tokenClient.requestAccessToken();
+}
 
-    document.getElementById("listView").style.display = "none";
-    document.getElementById("reader").classList.add("show");
-    status("Reading message");
-  }catch(e){
-    status("Could not open: " + e.message);
+$("connectBtn").onclick = connectGmail;
+
+/* GMAIL API REQUEST */
+async function gmailApi(url,token){
+  const response = await fetch(url,{
+    headers:{
+      Authorization:"Bearer "+token
+    }
+  });
+
+  const data = await response.json().catch(()=>({}));
+
+  if(!response.ok){
+    throw new Error(
+      data.error?.message || response.statusText
+    );
+  }
+
+  return data;
+}
+
+/* RENDER CONNECTED ACCOUNTS */
+function renderAccounts(){
+  const box = $("accounts");
+  $("accountCount").textContent = accounts.length;
+
+  if(!accounts.length){
+    box.innerHTML = '<div class="empty">No Gmail connected yet.</div>';
+    return;
+  }
+
+  box.innerHTML = accounts.map((account,index)=>`
+    <div class="account">
+      🟢 ${escapeHTML(account.email)}
+      <br>
+      <button onclick="filterAccount(${index})">VIEW MAIL</button>
+      <button class="danger" onclick="removeAccount(${index})">REMOVE</button>
+    </div>
+  `).join("");
+}
+
+/* REMOVE ACCOUNT */
+function removeAccount(index){
+  if(!confirm("এই Gmail Account সরিয়ে ফেলবেন?")) return;
+
+  accounts.splice(index,1);
+  mails = mails.filter(mail=>mail.account!==index);
+
+  mails = [];
+  selectedAccount = "all";
+
+  renderAccounts();
+  renderMails();
+}
+
+/* LOAD ALL INBOX */
+async function loadAll(){
+  if(!accounts.length){
+    status("আগে Gmail Connect করুন।");
+    return;
+  }
+
+  mails = [];
+  status("Loading Gmail messages...");
+
+  for(let i=0;i<accounts.length;i++){
+    const account = accounts[i];
+
+    try{
+      const result = await gmailApi(
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=30",
+        account.token
+      );
+
+      for(const item of (result.messages||[])){
+        try{
+          const msg = await gmailApi(
+            "https://gmail.googleapis.com/gmail/v1/users/me/messages/"+
+            item.id+"?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date",
+            account.token
+          );
+
+          const headers = msg.payload?.headers||[];
+
+          const getHeader = name =>
+            headers.find(h=>h.name.toLowerCase()===name.toLowerCase())?.value||"";
+
+          mails.push({
+            id:item.id,
+            account:i,
+            email:account.email,
+            from:getHeader("From"),
+            subject:getHeader("Subject")||"(No subject)",
+            date:getHeader("Date"),
+            snippet:msg.snippet||""
+          });
+        }catch(error){
+          console.log("Message error",error);
+        }
+      }
+    }catch(error){
+      status(account.email+": "+error.message);
+    }
+  }
+
+  mails.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  $("mailCount").textContent = mails.length;
+  renderMails();
+
+  status("Loaded "+mails.length+" messages from "+accounts.length+" Gmail accounts.");
+}
+
+/* ACCOUNT FILTER */
+function filterAccount(index){
+  selectedAccount = index;
+  renderMails();
+}
+
+/* RENDER MESSAGES */
+function renderMails(){
+  const box = $("mailList");
+  const query = $("search").value.toLowerCase();
+
+  const filtered = mails.filter(mail=>{
+    const accountMatch =
+      selectedAccount==="all" || mail.account===selectedAccount;
+
+    const searchMatch =
+      (mail.from+" "+mail.subject+" "+mail.snippet+" "+mail.email)
+      .toLowerCase().includes(query);
+
+    return accountMatch && searchMatch;
+  });
+
+  if(!filtered.length){
+    box.innerHTML = '<div class="empty">No messages found.</div>';
+    return;
+  }
+
+  box.innerHTML = filtered.map(mail=>`
+    <div class="mail" onclick="openMessage('${mail.id}',${mail.account})">
+      <strong>${escapeHTML(mail.from)}</strong>
+      <div class="subject">${escapeHTML(mail.subject)}</div>
+      <small>📩 Gmail: ${escapeHTML(mail.email)}</small>
+      <div class="date">${escapeHTML(mail.date)}</div>
+      <div style="color:#999;font-size:12px;margin-top:7px">
+        ${escapeHTML(mail.snippet)}
+      </div>
+      ${detectOTP(mail.snippet)?'<span class="tag">OTP DETECTED</span>':''}
+    </div>
+  `).join("");
+}
+
+/* OPEN MESSAGE */
+async function openMessage(id,index){
+  const account = accounts[index];
+  if(!account) return;
+
+  status("Opening message...");
+
+  try{
+    const msg = await gmailApi(
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/"+
+      id+"?format=full",
+      account.token
+    );
+
+    const headers = msg.payload?.headers||[];
+
+    const getHeader = name =>
+      headers.find(h=>h.name.toLowerCase()===name.toLowerCase())?.value||"";
+
+    const body = extractBody(msg.payload)||msg.snippet||"No readable message body.";
+
+    $("readSubject").textContent = getHeader("Subject");
+    $("readInfo").innerHTML =
+      "<p>From: "+escapeHTML(getHeader("From"))+"</p>"+
+      "<p>Gmail: "+escapeHTML(account.email)+"</p>"+
+      "<p>Date: "+escapeHTML(getHeader("Date"))+"</p>";
+
+    $("readBody").textContent = body;
+
+    const otp = detectOTP(body);
+
+    $("otpArea").innerHTML = otp
+      ? `<div class="tag">OTP: ${escapeHTML(otp)}</div>
+         <button class="full" onclick="copyOTP('${otp}')">COPY OTP</button>`
+      : "";
+
+    $("reader").classList.remove("hidden");
+    $("reader").scrollIntoView({behavior:"smooth"});
+
+    status("Message opened.");
+  }catch(error){
+    status("Could not open message: "+error.message);
   }
 }
 
-function copyOTP(code){
-  navigator.clipboard.writeText(code).then(() => {
-    showToast("✓ Copied: " + code);
-  }).catch(() => {
-    // fallback
-    const ta = document.createElement("textarea");
-    ta.value = code;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    showToast("✓ Copied: " + code);
-  });
+/* OTP DETECTION */
+function detectOTP(text){
+  const patterns = [
+    /(?:OTP|verification code|one.time password|security code)[^\d]{0,30}(\d{4,8})/i,
+    /\b(\d{6})\b/
+  ];
+
+  for(const pattern of patterns){
+    const match = String(text||"").match(pattern);
+    if(match) return match[1];
+  }
+
+  return null;
 }
 
-function closeReader(){
-  document.getElementById("reader").classList.remove("show");
-  document.getElementById("listView").style.display = "flex";
+/* COPY OTP */
+async function copyOTP(code){
+  try{
+    await navigator.clipboard.writeText(code);
+    alert("OTP Copied: "+code);
+  }catch(error){
+    alert("Copy failed. Manually copy: "+code);
+  }
 }
 
+/* EMAIL BODY EXTRACTION */
 function extractBody(part){
   if(!part) return "";
+
   if(part.body?.data){
     try{
-      let d = part.body.data.replace(/-/g, "+").replace(/_/g, "/");
-      d += "=".repeat((4 - d.length % 4) % 4);
-      const b = Uint8Array.from(atob(d), c => c.charCodeAt(0));
-      return new TextDecoder().decode(b);
-    }catch{}
+      let data = part.body.data.replace(/-/g,"+").replace(/_/g,"/");
+      data += "=".repeat((4-data.length%4)%4);
+
+      const bytes = Uint8Array.from(
+        atob(data),c=>c.charCodeAt(0)
+      );
+
+      return new TextDecoder().decode(bytes);
+    }catch(error){}
   }
-  for(const p of (part.parts || [])){
-    const b = extractBody(p);
-    if(b) return b;
+
+  for(const p of (part.parts||[])){
+    const body = extractBody(p);
+    if(body) return body;
   }
+
   return "";
 }
 
-function escapeHTML(v){
-  return String(v ?? "").replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;",
-    '"': "&quot;", "'": "&#39;"
+/* CLOSE READER */
+function closeReader(){
+  $("reader").classList.add("hidden");
+}
+
+/* HTML SECURITY */
+function escapeHTML(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   }[c]));
 }
 </script>
