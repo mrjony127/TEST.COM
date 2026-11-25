@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -479,6 +480,11 @@ let readerRequestNumber=0;
 let selectedMessage=null;
 let toastTimer=null;
 
+/* BACK BUTTON STATE */
+let readerHistoryOpen=false;
+let sidebarHistoryOpen=false;
+let ignoreNextPopState=false;
+
 const SYSTEM_FOLDERS=[
  {id:"INBOX",name:"All Inbox",icon:"✉"},
  {id:"STARRED",name:"Starred",icon:"★"},
@@ -544,8 +550,35 @@ function syncSearch(value){
  renderMessages();
 }
 
+/* SIDEBAR OPEN / CLOSE */
+
 function toggleSidebar(){
- $("sidebar")?.classList.toggle("open");
+ const sidebar=$("sidebar");
+ if(!sidebar)return;
+
+ if(sidebar.classList.contains("open")){
+  closeSidebar();
+ }else{
+  sidebar.classList.add("open");
+
+  if(window.matchMedia("(max-width:700px)").matches){
+   history.pushState({jonyMail:"sidebar"},"","#jony-mail-sidebar");
+   sidebarHistoryOpen=true;
+  }
+ }
+}
+
+function closeSidebar(){
+ const sidebar=$("sidebar");
+ if(!sidebar)return;
+
+ sidebar.classList.remove("open");
+
+ if(sidebarHistoryOpen){
+  sidebarHistoryOpen=false;
+  ignoreNextPopState=true;
+  history.back();
+ }
 }
 
 function formatDate(value){
@@ -668,6 +701,9 @@ auth.onAuthStateChanged(async user=>{
   selectedFolder="INBOX";
   selectedMessage=null;
 
+  readerHistoryOpen=false;
+  sidebarHistoryOpen=false;
+
   setText("connectedCount","0");
   setText("accountLimit","0 / 20 Accounts");
   setHTML("accountList","");
@@ -748,7 +784,7 @@ function renderAccounts(){
    renderFolders();
    loadMessages();
 
-   $("sidebar")?.classList.remove("open");
+   closeSidebar();
   };
 
   container.appendChild(item);
@@ -765,7 +801,7 @@ function selectAllAccounts(){
  renderFolders();
  loadMessages();
 
- $("sidebar")?.classList.remove("open");
+ closeSidebar();
 }
 
 /* FOLDERS */
@@ -795,7 +831,7 @@ function renderFolders(){
    selectedMessage=null;
    renderFolders();
    loadMessages();
-   $("sidebar")?.classList.remove("open");
+   closeSidebar();
   };
 
   container.appendChild(item);
@@ -833,7 +869,7 @@ async function loadCustomLabels(){
      selectedMessage=null;
      renderFolders();
      loadMessages();
-     $("sidebar")?.classList.remove("open");
+     closeSidebar();
     };
 
     container.appendChild(item);
@@ -1132,6 +1168,12 @@ async function openMessage(message){
   return;
  }
 
+ /* PHONE BACK HISTORY */
+ if(window.matchMedia("(max-width:700px)").matches && !readerHistoryOpen){
+  history.pushState({jonyMail:"reader"},"","#jony-mail-reader");
+  readerHistoryOpen=true;
+ }
+
  panel.classList.add("mobile-open");
  panel.innerHTML=readerToolbar()+'<div id="readerLoading">Loading email...</div>';
  bindReaderButtons();
@@ -1233,8 +1275,20 @@ async function openMessage(message){
  }
 }
 
-function closeReader(){
+function closeReader(fromPopState=false){
+ /* TOOLBAR BACK BUTTON */
+ if(!fromPopState && readerHistoryOpen){
+  readerHistoryOpen=false;
+  ignoreNextPopState=true;
+  history.back();
+ }
+
+ if(fromPopState){
+  readerHistoryOpen=false;
+ }
+
  readerRequestNumber++;
+
  const panel=$("readerPanel");
 
  if(panel)panel.classList.remove("mobile-open");
@@ -1242,6 +1296,47 @@ function closeReader(){
  selectedMessage=null;
  renderMessages();
 }
+
+/* ANDROID / BROWSER BACK BUTTON */
+
+window.addEventListener("popstate",function(){
+
+ if(ignoreNextPopState){
+  ignoreNextPopState=false;
+  return;
+ }
+
+ const sidebar=$("sidebar");
+ const panel=$("readerPanel");
+
+ /* SIDEBAR BACK */
+ if(sidebarHistoryOpen){
+  sidebarHistoryOpen=false;
+  sidebar?.classList.remove("open");
+  return;
+ }
+
+ /* EMAIL READER BACK */
+ if(readerHistoryOpen){
+  readerHistoryOpen=false;
+
+  if(panel && panel.classList.contains("mobile-open")){
+   closeReader(true);
+  }
+
+  return;
+ }
+
+ /* FALLBACK */
+ if(sidebar && sidebar.classList.contains("open")){
+  sidebar.classList.remove("open");
+  return;
+ }
+
+ if(panel && panel.classList.contains("mobile-open")){
+  closeReader(true);
+ }
+});
 
 /* CONNECT GMAIL */
 
